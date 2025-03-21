@@ -1,5 +1,7 @@
 
 const Client = require('../lib/client');
+const responses = require('../lib/responses');
+const utils = require('../utils/command.utils');
 
 /**
  * 
@@ -11,9 +13,21 @@ module.exports = (client, request, callback) => {
 
     const state = client._state;
 
-    const [command, ...args] = request.split(/\s+/g);
+    if(!state.mail.from) {
+        client.useResponse(responses.RCPT.RCPT_MAIL_REQUIRED);
+        return callback();
+    }
 
-    client.sendResponse(250, 'OK');
+    const parsed = utils.fetchAddress(request);
+
+    if(!parsed || !parsed.email) {
+        client.useResponse(responses.RCPT.RCPT_INVALID_SYNTAX);
+        return callback();
+    }
+
+    state.mail.recipients.push(parsed.email);
+
+    client.useResponse(responses.RCPT.RCPT_OK);
 
     callback();
 

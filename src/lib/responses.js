@@ -47,6 +47,36 @@ module.exports = {
 
     },
 
+    RCPT: {
+
+        RCPT_INVALID_SYNTAX: {
+            code: 501,
+            enhancedCode: '5.5.4',
+            message: 'Syntax: RCPT TO: <address>'
+        },
+
+        RCPT_OK: {
+            code: 250,
+            enhancedCode: '2.1.5',
+            message: 'Recipient OK'
+        },
+
+        RCPT_INVALID_RECIPIENT: {
+            code: 553,
+            enhancedCode: '5.1.7',
+            message: 'Invalid recipient'
+        },
+
+        RCPT_MAIL_REQUIRED: {
+            code: 503,
+            enhancedCode: '5.5.1',
+            message: 'Must issue MAIL command first'
+        },
+
+        
+
+    }
+
     //#endregion
 
 };
