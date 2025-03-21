@@ -1,5 +1,8 @@
-module.exports = {
+// Desc: Utility functions for parsing commands
+// Author: Bharath
+const url = require('url');
 
+module.exports = {
     /**
      * Returns a object with email address, domain and other args passed in the command
      * @param {string} input 
@@ -14,11 +17,20 @@ module.exports = {
             return undefined;
         }
 
-        let response = {};
-
         const address = email.replace('<', '').replace('>', '');
 
-        response.email = address;
+        const [user, domain] = address.split('@');
+
+        // too bad, we need to convert the domain to unicode, we commit to support IDN
+        let unicodeDomain = url.domainToUnicode(domain);
+
+        if (!unicodeDomain) {
+            return undefined;
+        }
+
+        let response = {};
+
+        response.email = user + '@' + unicodeDomain;
 
         response.args = {};
 
