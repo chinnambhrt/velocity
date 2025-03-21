@@ -115,6 +115,33 @@ class VelocityServer {
         }
     }
 
+    /**
+     * Stop the server
+     */
+    stop() {
+
+        if (this._server) {
+
+            this._server.close(() => {
+         
+                this._logger.info('Server stopped');
+         
+            });
+
+
+        } else {
+            this._logger.error('Server instance is not available');
+        }
+    }
+
+    /**
+     * Return whether the server is running
+     * @returns {boolean} Whether the server is running
+     */
+    isRunning() {
+        return this._server.listening;
+    }
+
 };
 
 module.exports = VelocityServer;
