@@ -145,6 +145,16 @@ class VelocityClient extends EventEmitter {
 
     }
 
+    handle_DATA(callback, ...args) {
+
+        this._socket.write('354 Start mail input; end with <CRLF>.<CRLF>\r\n');
+
+        this._state.dataMode = true;
+
+        callback();
+
+    }
+
 
     /**
      * Handle the socket error event

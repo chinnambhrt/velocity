@@ -44,6 +44,24 @@ class VelocityParser extends Writable {
 
         if (this.state.dataMode) {
 
+            const inputs = chunk.toString().trim().split(/\r?\n/g);
+
+            for (const input of inputs) {
+
+                if (input === ".") {
+
+                    this._dataMode = false;
+
+                    this._client._socket.write("250 OK\r\n");
+
+                } else {
+                    this._logger.debug("S:", input);
+                }
+            }
+
+            return next();
+
+
         } else {
 
 
