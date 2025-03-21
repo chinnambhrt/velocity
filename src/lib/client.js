@@ -128,7 +128,9 @@ class VelocityClient extends EventEmitter {
         capabilities.push('250-ENHANCEDSTATUSCODES');
 
         // advertise starttls if supported
-        capabilities.push('250-STARTTLS');
+        if (this._config.capabilities.STARTTLS) {
+            capabilities.push('250-STARTTLS');
+        }
 
         capabilities.push('250-8BITMIME');
 
