@@ -127,6 +127,9 @@ class VelocityClient extends EventEmitter {
 
         capabilities.push('250-ENHANCEDSTATUSCODES');
 
+        // advertise starttls if supported
+        capabilities.push('250-STARTTLS');
+
         capabilities.push('250-8BITMIME');
 
         capabilities.push('250 DSN');
@@ -152,6 +155,66 @@ class VelocityClient extends EventEmitter {
         this._state.dataMode = true;
 
         callback();
+
+    }
+
+
+    handle_STARTTLS(callback, ...args) {
+
+        if (this._state.tls.isSecure) {
+            this._socket.write('454 TLS already active\r\n');
+            return callback();
+        }
+
+        this._socket.write('220 Ready to start TLS\r\n');
+
+        this.removeAllListeners();
+
+        this._socket.unpipe(this._parser);
+
+        setImmediate(callback);
+
+        let tlsOptions = {};
+
+        tlsOptions.key = fs.readFileSync(path.resolve(this._config.tls.key))
+        tlsOptions.cert = fs.readFileSync(path.resolve(this._config.tls.cert))
+
+        if (this._config.tls.ca) {
+            tlsOptions.ca = fs.readFileSync(path.resolve(this._config.tls.ca))
+        }
+
+        if (this._config.tls.passphrase) {
+
+            const keyPass = this._config.tls.passphrase
+
+            if (keyPass.startsWith('plain:')) {
+                tlsOptions.passphrase = keyPass.replace('plain:', '')
+            } else {
+                tlsOptions.passphrase = Buffer.from(keyPass, 'base64').toString('utf-8')
+            }
+        }
+
+        const secureSocket = new tls.TLSSocket(this._socket, {
+            secureContext: tls.createSecureContext(tlsOptions),
+            isServer: true,
+        });
+
+        secureSocket.once('secure', () => {
+
+            this._logger.info('Connection upgraded to TLS', this._id, secureSocket.getCipher().standardName);
+
+            this._socket = secureSocket;
+
+            this._state.tls.isSecure = true;
+
+            this._state.tls.isUpgrading = false;
+
+            // this._socket.pipe(this._parser);
+
+            this._addEventListeners();
+
+        });
+
 
     }
 

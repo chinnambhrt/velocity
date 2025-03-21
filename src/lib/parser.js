@@ -31,6 +31,10 @@ class VelocityParser extends Writable {
      */
     _write(chunk, encoding, finish) {
 
+        if (!chunk || !chunk.length) return finish();
+
+        if (this.state.tls.isUpgrading) return finish();
+
         let once = false;
 
         const next = () => {
