@@ -18,6 +18,8 @@ class VelocityParser extends Writable {
 
         this._logger = client._logger;
 
+        this.state = client._state;
+
     }
 
 
@@ -27,13 +29,64 @@ class VelocityParser extends Writable {
      * @param {string} encoding 
      * @param {Function} callback 
      */
-    _write(chunk, encoding, callback) {
+    _write(chunk, encoding, finish) {
 
-        const message = chunk.toString();
+        let once = false;
 
-        this._logger.debug('Received message:', message);
+        const next = () => {
+            if (!once) {
+                once = true;
+                finish();
+            }
 
-        callback();
+            return;
+        }
+
+        if (this.state.dataMode) {
+
+        } else {
+
+
+            this._logger.debug("C:", chunk.toString().trim());
+
+            const inputs = chunk.toString().trim().split(/\r?\n/g);
+
+            if (inputs.length > 1) {
+
+                let processed = 0;
+
+                for (const input of inputs) {
+
+                    if (input === "") {
+                        processed++;
+                        continue;
+                    }
+
+                    this.onCommand(input, () => {
+
+                        processed++;
+
+                        if (processed === inputs.length) {
+                            next();
+                        }
+                    });
+
+                }
+
+            }
+            else {
+
+                const commandString = chunk.toString().trim();
+
+                this._client.onCommand(commandString, next);
+
+            }
+
+
+        }
+
+
+
     }
 
 

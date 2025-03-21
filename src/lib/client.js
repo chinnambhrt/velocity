@@ -63,6 +63,8 @@ class VelocityClient extends EventEmitter {
 
         this._parser = new Parser(this);
 
+        this._parser.onCommand = (r, c) => this.onCommand(r, c);
+
         this._addEventListeners();
 
     }
@@ -75,6 +77,71 @@ class VelocityClient extends EventEmitter {
         this._socket.on('end', this._onSocketEnd.bind(this));
 
         this._socket.on('error', this._onSocketError.bind(this));
+
+    }
+
+
+    /**
+     * 
+     * @param {string} smtpCommand 
+     * @param {Function} callback 
+     */
+    onCommand(smtpCommand, callback) {
+
+        const [command, ...args] = smtpCommand.split(/\s+/g);
+
+        /**
+         * @type {Function} handler
+         */
+        const handler = this[`handle_${command}`] || this.handle_UNKNOWN;
+
+        if (typeof handler !== 'function') {
+            callback('Handler is not a function');
+            return;
+        }
+
+        handler.call(this, callback, ...args);
+
+    }
+
+
+    handle_EHLO(callback, ...args) {
+        return this.handle_HELO(callback, ...args);
+    }
+
+
+    handle_HELO(callback, ...args) {
+
+        const domain = args[0];
+
+        if (!domain) {
+            this._socket.write('501 Syntax: HELO hostname\r\n');
+            return callback();
+        }
+
+        const capabilities = [];
+
+        capabilities.push(`250-Nice to meet you ${domain}`);
+
+        capabilities.push('250-PIPELINING');
+
+        capabilities.push('250-ENHANCEDSTATUSCODES');
+
+        capabilities.push('250-8BITMIME');
+
+        capabilities.push('250 DSN');
+
+        this._socket.write(capabilities.join('\r\n') + '\r\n');
+
+        callback();
+    }
+
+
+    handle_UNKNOWN(callback, ...args) {
+
+        this._socket.write('250 OK\r\n');
+
+        callback()
 
     }
 
