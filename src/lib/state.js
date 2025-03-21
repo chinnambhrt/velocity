@@ -94,6 +94,31 @@ class State {
 
     }
 
+
+    /**
+     * @method reset - Resets the state of the client
+     * @description This method resets the state of the client
+     */
+    reset() {
+
+        this.dataMode = false;
+
+        this.mail = {
+            from: '',
+            recipients: [],
+            data: Buffer.from('', 'binary'),
+            expectedSize: -1,
+            encoding: '7bit'
+        };
+
+        this.authentication = {
+            isAuthenticated: false,
+            mechanism: '',
+            user: {}
+        }
+
+    }
+
 }
 
 
