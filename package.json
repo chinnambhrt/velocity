@@ -2,9 +2,11 @@
   "name": "velocity",
   "version": "1.0.0",
   "description": "velocity email server",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
   },
   "repository": {
     "type": "git",
@@ -22,5 +24,11 @@
   "bugs": {
     "url": "https://github.com/chinnambhrt/velocity/issues"
   },
-  "homepage": "https://github.com/chinnambhrt/velocity#readme"
+  "homepage": "https://github.com/chinnambhrt/velocity#readme",
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
 }
