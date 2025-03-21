@@ -1,0 +1,26 @@
+{
+  "name": "velocity",
+  "version": "1.0.0",
+  "description": "velocity email server",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chinnambhrt/velocity.git"
+  },
+  "keywords": [
+    "velocity",
+    "email",
+    "smtp",
+    "starttls",
+    "chunking"
+  ],
+  "author": "Bharath Chinnam",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chinnambhrt/velocity/issues"
+  },
+  "homepage": "https://github.com/chinnambhrt/velocity#readme"
+}
