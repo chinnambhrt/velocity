@@ -1,0 +1,51 @@
+## folders
+
+node_modules/
+
+dist/
+coverage/
+
+.vscode/
+.idea/
+
+scratches/
+
+temp/
+
+cert*/
+
+
+## files
+
+package-lock.json
+
+
+*.log
+
+*.eml
+
+*.tmp
+
+
+## certificates
+*.pem
+*.key
+*.crt
+*.csr
+*.cer
+*.pfx
+*.p12
+
+# environment
+
+.env
+
+.env.local
+
+.env.development
+
+# IDE
+
+*.iml
+*.ipr
+
