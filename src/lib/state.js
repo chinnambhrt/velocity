@@ -26,10 +26,7 @@ class State {
          */
         this.domainClaimed = '';
 
-        /**
-         *  hold the tls information of the client
-         * @type {Object} tls holds the tls information of the client
-         */
+        // tls information of the client
         this.tls = {
 
             /**
@@ -44,9 +41,7 @@ class State {
 
         };
 
-        /**
-         * @type {Object} authentication holds the authentication information of the client
-         */
+        // authentication information of the client
         this.authentication = {
 
             /**
@@ -66,9 +61,6 @@ class State {
         };
 
 
-        /**
-         * @type {Object} mail holds the mail information of the client
-         */
         this.mail = {
 
             /**
@@ -85,6 +77,19 @@ class State {
              * @type {Buffer} data holds the data information
              */
             data: Buffer.from('', 'binary'),
+
+            /**
+             * holds the expected size of the data that is sent using the mail command
+             * @type {number} expectedSize size in bytes
+             */
+            expectedSize: -1,
+
+
+            // default 7bit
+            /**
+             * @type {string} encoding holds the encoding information
+             */
+            encoding: '7bit',
         };
 
     }

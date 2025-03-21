@@ -1,5 +1,6 @@
 
 const Client = require('../lib/client');
+const responses = require('../lib/responses');
 
 /**
  * 
@@ -14,11 +15,13 @@ module.exports = (client, request, callback) => {
     const [command, ...args] = request.split(/\s+/g);
 
     if (!args[0]) {
-        client.sendResponse('501 Syntax: EHLO hostname');
+        client.useResponse(responses.HELLO.HELLO_INVALID_SYNTAX);
         return callback();
     }
 
     state.domainClaimed = args[0];
+
+    state.ready = true;
 
     const capabilities = [];
 
@@ -38,7 +41,6 @@ module.exports = (client, request, callback) => {
     capabilities.push('250-8BITMIME');
 
     capabilities.push('250 DSN');
-
 
     client.sendResponse(0, capabilities.join('\r\n'));
 

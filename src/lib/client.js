@@ -153,7 +153,7 @@ class VelocityClient extends EventEmitter {
 
         secureSocket.once('secure', () => {
 
-            this._logger.info('Connection upgraded to TLS', this._id, secureSocket.getCipher().standardName);
+            this._logger.info('Client upgraded to TLS using:', secureSocket.getCipher().standardName);
 
             this._socket = secureSocket;
 
@@ -194,6 +194,24 @@ class VelocityClient extends EventEmitter {
             this._socket.write(payload);
             this._logger.debug('S:', payload.trim());
         }
+
+    }
+
+    /**
+     * Sends a response from the responses collection
+     * @param {{
+     * code:number,
+     * enhancedCode:string,
+     * message:string
+     * }} response to send to the client
+     */
+    useResponse(response) {
+
+        const { code, enhancedCode, message } = response;
+
+        const payload = `${enhancedCode} ${message}`;
+
+        this.sendResponse(code, payload);
 
     }
 
