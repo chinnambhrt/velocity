@@ -31,7 +31,7 @@ module.exports = (client, request, callback) => {
 
     state.mail.expectedSize = Number(parsed.args.SIZE) || -1;
 
-    client.sendResponse(250, 'OK');
+    client.useResponse(responses.MAIL.MAIL_OK);
 
     callback();
 
