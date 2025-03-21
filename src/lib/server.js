@@ -68,11 +68,11 @@ class VelocityServer {
 
         const client = new Client(socket, this._config);
 
-        this._clients.set(client.id, client);
+        this._clients.set(client._id, client);
 
-        this._logger.info('Client connected', client.id);
+        this._logger.info('Client connected', client._id);
 
-        client.on('disconnected', () => this._removeClient(client));
+        client.on('disconnected', (id) => this._removeClient(id));
 
         socket.write('220 Velocity server at your service\r\n');
 

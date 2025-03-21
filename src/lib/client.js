@@ -92,7 +92,7 @@ class VelocityClient extends EventEmitter {
      */
     _onSocketEnd() {
 
-        this._logger.info('Client disconnected', this._id);
+        // this._logger.info('Client disconnected', this._id);
 
         this.emit('disconnected', this._id);
 
