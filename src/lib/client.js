@@ -18,6 +18,8 @@ const { randomUUID } = require('crypto');
 
 const State = require('./state');
 
+const handlers = require('./commands');
+
 
 /**
  * Velocity Client class, used to represent a connected client
@@ -93,75 +95,23 @@ class VelocityClient extends EventEmitter {
         /**
          * @type {Function} handler
          */
-        const handler = this[`handle_${command}`] || this.handle_UNKNOWN;
+        const handler = handlers[command];
+
+        if (!handler) {
+            this.sendResponse(500, 'Command not recognized');
+            return callback();
+        }
 
         if (typeof handler !== 'function') {
             callback('Handler is not a function');
             return;
         }
 
-        handler.call(this, callback, ...args);
+        handler(this, smtpCommand, callback);
 
     }
 
-
-    handle_EHLO(callback, ...args) {
-        return this.handle_HELO(callback, ...args);
-    }
-
-
-    handle_HELO(callback, ...args) {
-
-        const domain = args[0];
-
-        if (!domain) {
-            this._socket.write('501 Syntax: HELO hostname\r\n');
-            return callback();
-        }
-
-        const capabilities = [];
-
-        capabilities.push(`250-Nice to meet you ${domain}`);
-
-        capabilities.push('250-PIPELINING');
-
-        capabilities.push('250-ENHANCEDSTATUSCODES');
-
-        // advertise starttls if supported
-        if (this._config.capabilities.STARTTLS) {
-            capabilities.push('250-STARTTLS');
-        }
-
-        capabilities.push('250-8BITMIME');
-
-        capabilities.push('250 DSN');
-
-        this._socket.write(capabilities.join('\r\n') + '\r\n');
-
-        callback();
-    }
-
-
-    handle_UNKNOWN(callback, ...args) {
-
-        this._socket.write('250 OK\r\n');
-
-        callback()
-
-    }
-
-    handle_DATA(callback, ...args) {
-
-        this._socket.write('354 Start mail input; end with <CRLF>.<CRLF>\r\n');
-
-        this._state.dataMode = true;
-
-        callback();
-
-    }
-
-
-    handle_STARTTLS(callback, ...args) {
+    upgradeToTls(callback) {
 
         if (this._state.tls.isSecure) {
             this._socket.write('454 TLS already active\r\n');
@@ -211,13 +161,50 @@ class VelocityClient extends EventEmitter {
 
             this._state.tls.isUpgrading = false;
 
-            // this._socket.pipe(this._parser);
-
             this._addEventListeners();
 
         });
 
 
+    }
+
+    /**
+     * 
+     * @param {number} code 
+     * @param {string | string[]} message 
+     */
+    sendResponse(code, message) {
+
+        let payload = Array.isArray(message) ? message.join('\r\n') : message;
+
+        if (code) {
+            payload = `${code} ${payload}`;
+        }
+
+        if (!payload.endsWith('\r\n')) {
+            payload += '\r\n';
+        }
+
+        if (
+            this._socket &&
+            this._socket.readyState === 'open' &&
+            this._socket.writable
+        ) {
+
+            this._socket.write(payload);
+            this._logger.debug('S:', payload.trim());
+        }
+
+    }
+
+
+    /**
+     * Disconnect the client
+     */
+    disconnect() {
+        if (this._socket && !this._socket.closed) {
+            this._socket.end('221 Goodbye\r\n');
+        }
     }
 
 
