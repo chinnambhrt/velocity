@@ -20,7 +20,8 @@ const State = require('./state');
 
 const handlers = require('./commands');
 
-const MailObject = require('../types/mail-object')
+const MailObject = require('../types/mail-object');
+const responses = require('./responses');
 
 
 /**
@@ -58,6 +59,31 @@ class VelocityClient extends EventEmitter {
         // initialize the client
         this._init();
 
+        /**
+         * Hold all the safenet related data
+         */
+        this.safenet = {
+
+            /**
+             * The number of unrecognized commands sent by the client
+             */
+            unrecognizedCommands: 0,
+
+            /**
+             * The last command sent by the client
+             */
+            previousCommand: '',
+
+            /**
+             * The number of times the client has sent the no greeting commands
+             * in loop without doing anything else. These are bad guys
+             * who are trying to keep the connection open without doing anything
+             * useful. Disconnect them after certain number of commands
+             */
+            noGreetLoopCount: 0,
+
+        }
+
     }
 
     /**
@@ -83,7 +109,7 @@ class VelocityClient extends EventEmitter {
         this._socket.on('end', this._onSocketEnd.bind(this));
 
         this._socket.on('error', this._onSocketError.bind(this));
-        
+
     }
 
     /**
@@ -131,15 +157,73 @@ class VelocityClient extends EventEmitter {
 
         const [command, ...args] = smtpCommand.split(/\s+/g);
 
+        const knownCommands = Object.keys(handlers);
+
+        if (!knownCommands.includes(command)) {
+
+            // increment the safenet uncognized commands count
+            // this will not be reset until the client disconnects
+            // good guys will not fiddle with the system
+            this.safenet.unrecognizedCommands++;
+
+            // 10 is the hard limit for unrecognized commands
+            if (this.safenet.unrecognizedCommands > 10) {
+
+                // TODO: add the user to the safenet blacklist
+                this._logger.warn('Client has sent too many unrecognized commands; disconnecting');
+
+                this.disconnect();
+
+                return;
+            }
+
+            this.sendResponse(500, 'Command not recognized');
+
+            return callback();
+        }
+
+        // commands that do not require a EHLO/HELO greeting
+        const noGreetCommands = ['HELO', 'EHLO', 'STARTTLS', 'QUIT', 'NOOP', 'RSET'];
+
+        if (!this._state.ready) {
+
+            // if the client has not sent a HELO/EHLO command
+            if (!noGreetCommands.includes(command)) {
+
+                this.useResponse(responses.HELLO.HELLO_REQUIRED);
+
+                return callback();
+
+            }
+
+            // check if the client is trying to keep the connection open
+            // without doing anything useful
+            if (noGreetCommands.includes(this.safenet.previousCommand)) {
+
+                this.safenet.noGreetLoopCount++;
+
+                if (this.safenet.noGreetLoopCount > 5) {
+
+                    this._logger.warn('Client is looping through no greet commands; disconnecting');
+
+                    this.disconnect();
+
+                    return;
+
+                }
+            } else {
+                // reset the loop count
+                this.safenet.noGreetLoopCount = 0;
+
+            }
+
+        }
+
+
         /**
          * @type {Function} handler
          */
         const handler = handlers[command];
-
-        if (!handler) {
-            this.sendResponse(500, 'Command not recognized');
-            return callback();
-        }
 
         if (typeof handler !== 'function') {
             callback('Handler is not a function');
