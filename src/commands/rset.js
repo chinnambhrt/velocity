@@ -9,9 +9,9 @@ const Client = require('../lib/client');
  */
 module.exports = (client, request, callback) => {
 
-    const state = client._state;
+    client._state.reset();
 
-    const [command, ...args] = request.split(/\s+/g);
+    // const [command, ...args] = request.split(/\s+/g);
 
     client.sendResponse(250, 'OK');
 
