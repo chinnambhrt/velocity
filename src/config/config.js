@@ -31,9 +31,9 @@ const Konfig = {
     maxConnections: 100,
 
     /**
-     * Maximum size of an email in bytes (10MB)
+     * Maximum size of an email in bytes (3MB)
      */
-    maxEmailSize: 1024 * 1024 * 10,
+    maxEmailSize: 1024 * 1024 * 3,
 
     /**
      * indicates whether the server should use tls server or tcp server
@@ -50,7 +50,7 @@ const Konfig = {
      * Log level for the server
      * Possible values: 'info', 'debug', 'warn', 'error'
      */
-    logLevel: process.env.V_LOG_LEVEL ||'info',
+    logLevel: process.env.V_LOG_LEVEL || 'info',
 
     /**
      * Path to the log file
