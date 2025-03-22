@@ -21,6 +21,7 @@ const State = require('./state');
 const handlers = require('./commands');
 
 const MailObject = require('../types/mail-object');
+
 const responses = require('./responses');
 
 
@@ -81,6 +82,16 @@ class VelocityClient extends EventEmitter {
              * useful. Disconnect them after certain number of commands
              */
             noGreetLoopCount: 0,
+
+            /**
+             * Checks if the command is a HTTP command, we do not want those users
+             * to be around disconnect them
+             * @param {string} command 
+             * @returns 
+             */
+            isHttpCommand: (command) => {
+                return /^(OPTIONS|GET|HEAD|POST|PUT|DELETE|TRACE|CONNECT) \/.* HTTP\/\d\.\d$/i.test(command)
+            }
 
         }
 
@@ -161,6 +172,15 @@ class VelocityClient extends EventEmitter {
 
         if (!knownCommands.includes(command)) {
 
+            if (this.safenet.isHttpCommand(command)) {
+                
+                this._logger.warn('Client is trying to send a HTTP command; disconnecting');
+
+                this.disconnect();
+                
+                return;
+            }
+
             // increment the safenet uncognized commands count
             // this will not be reset until the client disconnects
             // good guys will not fiddle with the system
@@ -202,6 +222,10 @@ class VelocityClient extends EventEmitter {
 
                 this.safenet.noGreetLoopCount++;
 
+                /**
+                 * If the client has sent the no greet commands in loop
+                 * without doing anything else, disconnect them
+                 */
                 if (this.safenet.noGreetLoopCount > 5) {
 
                     this._logger.warn('Client is looping through no greet commands; disconnecting');
@@ -342,9 +366,14 @@ class VelocityClient extends EventEmitter {
     /**
      * Disconnect the client
      */
-    disconnect() {
+    disconnect(message) {
+
+        const payload = message || '221 Goodbye\r\n';
+
         if (this._socket && !this._socket.closed) {
-            this._socket.end('221 Goodbye\r\n');
+
+            this._socket.end(payload);
+
         }
     }
 
