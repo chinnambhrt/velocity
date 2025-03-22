@@ -89,6 +89,18 @@ module.exports = {
             code: 354,
             enhancedCode: '2.7.0',
             message: 'Start mail input; end with <CRLF>.<CRLF>'
+        },
+
+        DATA_MAIL_ACCEPTED: {
+            code: 250,
+            enhancedCode: '2.6.0',
+            message: 'Ok; Mail queued for delivery'
+        },
+
+        EXCEEDS_MAX_SIZE: {
+            code: 552,
+            enhancedCode: '5.2.3',
+            message: 'Message exceeds allowed size'
         }
 
     },

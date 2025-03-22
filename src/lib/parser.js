@@ -1,6 +1,7 @@
 
 const { Writable } = require('stream');
 const Client = require('./client');
+const responses = require('./responses');
 
 class VelocityParser extends Writable {
 
@@ -48,26 +49,9 @@ class VelocityParser extends Writable {
 
         if (this.state.dataMode) {
 
-            const inputs = chunk.toString().trim().split(/\r?\n/g);
-
-            for (const input of inputs) {
-
-                if (input === ".") {
-
-                    this._dataMode = false;
-
-                    this._client._socket.write("250 OK\r\n");
-
-                } else {
-                    this._logger.debug("S:", input);
-                }
-            }
-
-            return next();
-
+            this._processDataMode(chunk, next);
 
         } else {
-
 
             this._logger.debug("C:", chunk.toString().trim());
 
@@ -108,6 +92,112 @@ class VelocityParser extends Writable {
         }
 
 
+
+    }
+
+
+    /**
+     * 
+     * @param {Buffer} chunk 
+     * @param {Function} callback 
+     */
+    _processDataMode(chunk, callback) {
+
+        // this._logger.debug("Data:", chunk.toString());
+
+        if (chunk.length <= 3 && chunk.toString().trim() === ".") {
+
+            // data mode has ended
+            this.state.dataMode = false;
+
+            this._client.useResponse(responses.DATA.DATA_MAIL_ACCEPTED);
+
+            return callback();
+        }
+
+        const endSequence = Buffer.from("\r\n.\r\n", 'binary');
+
+        const endIndex = chunk.indexOf(endSequence);
+
+        if (endIndex > -1) {
+
+            const lastBytes = chunk.subarray(0, endIndex);
+
+            const remainder = chunk.subarray(endIndex + endSequence.length);
+
+            // proceed to add the data stream
+            // if successfully added then we can end the data mode
+            // and send the response to the client
+            // process the remainder if there is any left
+            if (this._addDataStream(lastBytes)) {
+
+                this.state.dataMode = false;
+
+                this._client.useResponse(responses.DATA.DATA_MAIL_ACCEPTED);
+
+                // if there is any data left in the remainder
+                if (remainder.length > 0) {
+
+                    return this._write(remainder, 'binary', callback);
+
+                }
+                else {
+                    return callback();
+                }
+
+            } else {
+
+                // if the data is not added successfully
+                // then we should end the data mode and return
+                this._logger.info('S: Data exceeds max size allowed / expected');
+
+                return callback();
+
+            }
+
+
+        }
+
+        this._addDataStream(chunk);
+
+        callback();
+
+    }
+
+    /**
+     * 
+     * @param {Buffer} chunk 
+     * @returns {boolean} returns true if the data stream is added successfully
+     */
+    _addDataStream(chunk) {
+
+        const expectedSize = this.state.mail.expectedSize;
+
+        const chunkSize = chunk.length;
+
+        const nextSize = this.state.mail.data.length + chunkSize;
+
+        // check if the data size is greater than the max email size allowed by the server
+        // if it is then we should not accept the data and return false
+        // indicating that the data is not added successfully
+        if (nextSize > this._client._config.maxEmailSize) {
+            this._client.useResponse(responses.DATA.EXCEEDS_MAX_SIZE);
+            this.state.dataMode = false;
+            return false;
+        }
+
+        // pperform the validation only if the expected size is greater than 0
+        // grater than 0 means that the client has sent the size of the data
+        // in the mail command and we are expecting the data to be of that size
+        if (expectedSize > 0 && nextSize > expectedSize) {
+            this._client.useResponse(responses.DATA.DATA_TOO_LONG);
+            this.state.dataMode = false;
+            return false;
+        }
+
+        this.state.mail.data = Buffer.concat([this.state.mail.data, chunk]);
+
+        return true;
 
     }
 

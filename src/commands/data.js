@@ -12,7 +12,7 @@ module.exports = (client, _, callback) => {
 
     const state = client._state;
 
-    client._logger.debug('State', JSON.stringify(state))
+    // client._logger.debug('State', JSON.stringify(state))
 
     // require mail command
     if (!state.mail.from) {
