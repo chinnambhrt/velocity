@@ -158,6 +158,8 @@ class VelocityParser extends Writable {
 
         }
 
+        // result doesn't matter, we're gonna 
+        // unpause the data stream anyway
         this._addDataStream(chunk);
 
         callback();
