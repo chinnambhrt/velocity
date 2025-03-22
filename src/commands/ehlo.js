@@ -29,7 +29,9 @@ module.exports = (client, request, callback) => {
 
     capabilities.push(`250-SIZE ${client._config.maxEmailSize}`);
 
-    capabilities.push('250-PIPELINING');
+    if (client._config.capabilities.PIPELINING) {
+        capabilities.push('250-PIPELINING');
+    }
 
     capabilities.push('250-ENHANCEDSTATUSCODES');
 
@@ -38,7 +40,14 @@ module.exports = (client, request, callback) => {
         capabilities.push('250-STARTTLS');
     }
 
+    if (client._config.capabilities.SMTPUTF8) {
+        capabilities.push('250-SMTPUTF8');
+    }
+
+
     capabilities.push('250-8BITMIME');
+
+    capabilities.push('250-VRFY')
 
     capabilities.push('250 DSN');
 

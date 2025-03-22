@@ -18,4 +18,6 @@ module.exports = {
 
     STARTTLS: require('../commands/starttls'),
 
+    VRFY: require('../commands/vrfy'),
+
 };

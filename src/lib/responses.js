@@ -91,6 +91,28 @@ module.exports = {
             message: 'Start mail input; end with <CRLF>.<CRLF>'
         }
 
+    },
+
+    VRFY: {
+
+        VRFY_NOT_SUPPORTED: {
+            code: 502,
+            enhancedCode: '5.5.1',
+            message: 'Command not implemented'
+        },
+
+        VRFY_INVALID_SYNTAX: {
+            code: 501,
+            enhancedCode: '5.5.4',
+            message: 'Syntax: VRFY <address>'
+        },
+
+        VRFY_OK: {
+            code: 252,
+            enhancedCode: '2.5.2',
+            message: 'Cannot VRFY user, but will accept message and attempt delivery'
+        }
+
     }
 
     //#endregion
