@@ -64,7 +64,7 @@ Logs can be written to a file or the console. Configure the log settings in the 
 
 ## Project Structure
 
-```
+```plaintext
 
 .env
 .gitignore
