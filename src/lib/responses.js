@@ -73,7 +73,17 @@ module.exports = {
             message: 'Must issue MAIL command first'
         },
 
-        
+
+
+    },
+
+    DATA: {
+
+        DATA_START_INPUT: {
+            code: 354,
+            enhancedCode: '2.7.0',
+            message: 'Start mail input; end with <CRLF>.<CRLF>'
+        }
 
     }
 

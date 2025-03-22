@@ -1,5 +1,6 @@
 
 const Client = require('../lib/client');
+const responses = require('../lib/responses');
 
 /**
  * 
@@ -7,15 +8,26 @@ const Client = require('../lib/client');
  * @param {string} request 
  * @param {Function} callback 
  */
-module.exports = (client, request, callback) => {
+module.exports = (client, _, callback) => {
 
     const state = client._state;
 
-    const [command, ...args] = request.split(/\s+/g);
+    
+    // require mail command
+    if (!state.mail.from) {
+        client.useResponse(responses.RCPT.RCPT_MAIL_REQUIRED);
+        return callback();
+    }
+
+    // require at least one recipient
+    if (state.mail.recipients.length > 0) {
+        client.useResponse(responses.RCPT.RCPT_RCPT_REQUIRED);
+        return callback();
+    }
 
     state.dataMode = true;
 
-    client.sendResponse(354, 'Start mail input; end with <CRLF>.<CRLF>');
+    client.useResponse(responses.DATA.DATA_START_INPUT);
 
     callback();
 
