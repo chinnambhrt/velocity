@@ -1,4 +1,4 @@
-# Velocity Email Server
+# Velocity SMTP Server
 
 Velocity is a simple and configurable email server supporting ESMTP, STARTTLS, and other SMTP extensions.
 
