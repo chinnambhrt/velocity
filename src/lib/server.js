@@ -8,6 +8,7 @@ const Config = require('../config/config');
 const Logger = require('../logger');
 
 const Client = require('./client');
+const MailObject = require('../types/mail-object');
 
 class VelocityServer {
 
@@ -68,11 +69,14 @@ class VelocityServer {
 
         const client = new Client(socket, this._config);
 
+        
         this._clients.set(client._id, client);
-
+        
         this._logger.info('Client connected', client._id);
-
+        
         client.on('disconnected', (id) => this._removeClient(id));
+        
+        client.on('mail', (m) => this.onMailReceived(m));
 
         socket.write('220 Velocity server at your service\r\n');
 
@@ -123,9 +127,9 @@ class VelocityServer {
         if (this._server) {
 
             this._server.close(() => {
-         
+
                 this._logger.info('Server stopped');
-         
+
             });
 
 
@@ -140,6 +144,14 @@ class VelocityServer {
      */
     isRunning() {
         return this._server.listening;
+    }
+
+    /**
+     * Triggered when a mail is received by the server
+     * @param {MailObject} mail 
+     */
+    onMailReceived(mail) {
+        this._logger.info('Mail received', mail);
     }
 
 };

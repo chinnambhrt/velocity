@@ -20,6 +20,8 @@ const State = require('./state');
 
 const handlers = require('./commands');
 
+const MailObject = require('../types/mail-object')
+
 
 /**
  * Velocity Client class, used to represent a connected client
@@ -71,7 +73,9 @@ class VelocityClient extends EventEmitter {
 
     }
 
-
+    /**
+     * Add event listeners to the socket
+     */
     _addEventListeners() {
 
         this._socket.pipe(this._parser);
@@ -79,8 +83,43 @@ class VelocityClient extends EventEmitter {
         this._socket.on('end', this._onSocketEnd.bind(this));
 
         this._socket.on('error', this._onSocketError.bind(this));
+        
+    }
+
+    /**
+     * Starts the data mode for the client
+     */
+    startDataMode() {
+
+        this._state.dataMode = true;
 
     }
+
+    /**
+     * Ends the data mode for the client
+     * @param {Error} error 
+     */
+    endDataMode(error) {
+
+        this._state.dataMode = false
+
+        if (error) {
+            this._logger.info('Error in data mode', error);
+            return;
+        }
+
+        const mail = new MailObject(
+            this._state.mail.from,
+            this._state.mail.recipients,
+            this._state.mail.data.toString('utf-8'),
+            this._state.mail.encoding,
+            this._state.mail.data.length
+        );
+
+        this._emitMailEvent(mail);
+
+    }
+
 
 
     /**
@@ -120,7 +159,7 @@ class VelocityClient extends EventEmitter {
 
         this._socket.write('220 Ready to start TLS\r\n');
 
-        this.removeAllListeners();
+        this._socket.removeAllListeners();
 
         this._socket.unpipe(this._parser);
 
@@ -243,6 +282,15 @@ class VelocityClient extends EventEmitter {
 
         this.emit('disconnected', this._id);
 
+    }
+
+    /**
+     * Emit the mail event with the mail object
+     * @param {MailObject} mail 
+     */
+    async _emitMailEvent(mail) {
+        // this._logger.debug('Mail received', JSON.stringify(mail));
+        this.emit('mail', mail);
     }
 
 };
