@@ -101,6 +101,12 @@ module.exports = {
             code: 552,
             enhancedCode: '5.2.3',
             message: 'Message exceeds allowed size'
+        },
+
+        ERROR: {
+            code: 451,
+            enhancedCode: '4.3.0',
+            message: 'Error processing message. Try again later'
         }
 
     },

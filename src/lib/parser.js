@@ -110,7 +110,7 @@ class VelocityParser extends Writable {
             // data mode has ended
             this._client.endDataMode();
 
-            this._client.useResponse(responses.DATA.DATA_MAIL_ACCEPTED);
+            // this._client.useResponse(responses.DATA.DATA_MAIL_ACCEPTED);
 
             return callback();
         }
@@ -132,8 +132,6 @@ class VelocityParser extends Writable {
             if (this._addDataStream(lastBytes)) {
 
                 this._client.endDataMode();
-
-                this._client.useResponse(responses.DATA.DATA_MAIL_ACCEPTED);
 
                 // if there is any data left in the remainder
                 if (remainder.length > 0) {
@@ -183,8 +181,7 @@ class VelocityParser extends Writable {
         // if it is then we should not accept the data and return false
         // indicating that the data is not added successfully
         if (nextSize > this._client._config.maxEmailSize) {
-            this._client.endDataMode(new Error('Data exceeds max size allowed'));
-            this._client.useResponse(responses.DATA.EXCEEDS_MAX_SIZE);
+            this._client.endDataMode(new Error('EXCEEDS_MAX_SIZE'));
             return false;
         }
 
@@ -192,8 +189,7 @@ class VelocityParser extends Writable {
         // grater than 0 means that the client has sent the size of the data
         // in the mail command and we are expecting the data to be of that size
         if (expectedSize > 0 && nextSize > expectedSize) {
-            this._client.endDataMode(new Error('Data exceeds expected size'));
-            this._client.useResponse(responses.DATA.DATA_TOO_LONG);
+            this._client.endDataMode(new Error('EXCEEDS_MAX_SIZE'));
             return false;
         }
 

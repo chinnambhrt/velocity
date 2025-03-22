@@ -24,6 +24,9 @@ const MailObject = require('../types/mail-object');
 
 const responses = require('./responses');
 
+const EmailHandler = require('../plugins/email-handler');
+
+
 
 /**
  * Velocity Client class, used to represent a connected client
@@ -35,8 +38,9 @@ class VelocityClient extends EventEmitter {
      * 
      * @param {net.Socket} socket 
      * @param {Config} config 
+     * @param {EmailHandler} emailHandler
      */
-    constructor(socket, config) {
+    constructor(socket, config, emailHandler) {
 
         super();
 
@@ -48,6 +52,12 @@ class VelocityClient extends EventEmitter {
 
         // store the config
         this._config = config;
+
+        /**
+         * Handles the email received by client
+         * @type {EmailHandler}
+         */
+        this._emailHandler = emailHandler;
 
         // create the state
         this._state = new State();
@@ -140,8 +150,11 @@ class VelocityClient extends EventEmitter {
 
         this._state.dataMode = false
 
+        // if there is an error in the data mode
         if (error) {
             this._logger.info('Error in data mode', error);
+            this._state.reset();
+            this.useResponse(responses.DATA[error.message]);
             return;
         }
 
@@ -153,7 +166,23 @@ class VelocityClient extends EventEmitter {
             this._state.mail.data.length
         );
 
-        this._emitMailEvent(mail);
+        this._state.reset();
+
+        if (this._emailHandler.addEmailToQueue(mail)) {
+
+            // email is accepted            
+            // respond to the server
+            this.useResponse(responses.DATA.DATA_MAIL_ACCEPTED);
+
+            // emit the mail event
+            this._emitMailEvent(mail);
+
+        } else {
+
+            // if the email is not added to the queue
+            this.useResponse(responses.DATA.ERROR);
+
+        }
 
     }
 
@@ -173,11 +202,11 @@ class VelocityClient extends EventEmitter {
         if (!knownCommands.includes(command)) {
 
             if (this.safenet.isHttpCommand(command)) {
-                
+
                 this._logger.warn('Client is trying to send a HTTP command; disconnecting');
 
                 this.disconnect();
-                
+
                 return;
             }
 

@@ -8,7 +8,10 @@ const Config = require('../config/config');
 const Logger = require('../logger');
 
 const Client = require('./client');
+
 const MailObject = require('../types/mail-object');
+
+const EmailHandler = require('../plugins/email-handler');
 
 class VelocityServer {
 
@@ -26,9 +29,17 @@ class VelocityServer {
          */
         this._server = null;
 
+
         this._logger = new Logger('_velocity_server_', {
             logLevel: this._config.logLevel
         });
+
+        /**
+         * Create a new email handler on server start
+         * @type {EmailHandler} 
+         */
+        this._emailHandler = new EmailHandler(this._config);
+
 
         /**
          * Map of connected clients
@@ -67,16 +78,14 @@ class VelocityServer {
 
         }
 
-        const client = new Client(socket, this._config);
+        const client = new Client(socket, this._config, this._emailHandler);
 
-        
+
         this._clients.set(client._id, client);
-        
+
         this._logger.info('Client connected', client._id);
-        
+
         client.on('disconnected', (id) => this._removeClient(id));
-        
-        client.on('mail', (m) => this.onMailReceived(m));
 
         socket.write('220 Velocity server at your service\r\n');
 
@@ -144,14 +153,6 @@ class VelocityServer {
      */
     isRunning() {
         return this._server.listening;
-    }
-
-    /**
-     * Triggered when a mail is received by the server
-     * @param {MailObject} mail 
-     */
-    onMailReceived(mail) {
-        this._logger.info('Mail received', mail);
     }
 
 };
