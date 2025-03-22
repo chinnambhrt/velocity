@@ -12,7 +12,8 @@ module.exports = (client, _, callback) => {
 
     const state = client._state;
 
-    
+    client._logger.debug('State', JSON.stringify(state))
+
     // require mail command
     if (!state.mail.from) {
         client.useResponse(responses.RCPT.RCPT_MAIL_REQUIRED);
@@ -20,8 +21,8 @@ module.exports = (client, _, callback) => {
     }
 
     // require at least one recipient
-    if (state.mail.recipients.length > 0) {
-        client.useResponse(responses.RCPT.RCPT_RCPT_REQUIRED);
+    if (state.mail.recipients.length <= 0) {
+        client.useResponse(responses.RCPT.RECIPIENT_REQUIRED);
         return callback();
     }
 

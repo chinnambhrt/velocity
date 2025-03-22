@@ -73,6 +73,12 @@ module.exports = {
             message: 'Must issue MAIL command first'
         },
 
+        RECIPIENT_REQUIRED: {
+            code: 503,
+            enhancedCode: '5.5.1',
+            message: 'Must issue RCPT command first'
+        }
+
 
 
     },
