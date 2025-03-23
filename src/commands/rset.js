@@ -11,8 +11,6 @@ module.exports = (client, request, callback) => {
 
     client._state.reset();
 
-    // const [command, ...args] = request.split(/\s+/g);
-
     client.sendResponse(250, 'OK');
 
     callback();
