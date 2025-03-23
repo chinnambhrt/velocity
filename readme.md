@@ -12,6 +12,11 @@ Velocity is a simple and configurable email server supporting ESMTP, STARTTLS, a
 - **SMTPUTF8**: Support for internationalized email addresses.
 - **DSN**: Delivery Status Notifications.
 
+### What this server does not do
+
+- **Relay**: This server does not relay emails.
+- **Outbound**: does not send emails to external domains.
+
 ## Installation
 
 1. Clone the repository:
