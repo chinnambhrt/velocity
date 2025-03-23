@@ -131,6 +131,8 @@ class VelocityClient extends EventEmitter {
 
         this._socket.on('error', this._onSocketError.bind(this));
 
+        this._socket.setTimeout(this._config.connectionTimeout, this._onSocketTimeout.bind(this));
+
     }
 
     /**
@@ -424,6 +426,14 @@ class VelocityClient extends EventEmitter {
 
         this.emit('disconnected', this._id);
 
+    }
+
+    /**
+     * Handle the socket timeout event
+     */
+    _onSocketTimeout() {
+        this._logger.warn('Timeout reached; disconnecting client');
+        this.disconnect('421 Timeout\r\n');
     }
 
     /**
