@@ -77,9 +77,13 @@ module.exports = {
             code: 503,
             enhancedCode: '5.5.1',
             message: 'Must issue RCPT command first'
+        },
+
+        NO_RELAYING: {
+            code: 553,
+            enhancedCode: '5.7.1',
+            message: 'Too bad; No relay, velocity does not play on your behalf'
         }
-
-
 
     },
 
