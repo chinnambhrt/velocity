@@ -1,13 +1,17 @@
+const os = require('os');
 
 const Konfig = {
 
     // server
-    host: 'localhost',
+    // on which the server will listen
+    // for incoming emails
+    host: process.env.V_HOST || os.hostname(),
 
     /**
-     * Domain name for which blaze will accept email
+     * Domain name for which velocity will accept email
+     * This is used to validate the recipient email address
      */
-    emailDomain: ['example.com'],
+    emailDomain: process.env.V_DOMAIN || 'example.com',
 
     /**
      * Port for the ESMTP server to listen on
@@ -23,7 +27,7 @@ const Konfig = {
     /**
      * Timeout for the server to wait for a response from the client
      */
-    connectionTimeout: 1000 * 60 * 2,// 2 minutes,
+    connectionTimeout: Number(process.env.V_TIMEOUT) || (1000 * 60 * 2),// 2 minutes,
 
     /**
      * Maximum number of connections to allow
