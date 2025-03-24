@@ -28,7 +28,8 @@
   "dependencies": {
     "chai": "^5.2.0",
     "dotenv": "^16.4.7",
-    "mocha": "^11.1.0"
+    "mocha": "^11.1.0",
+    "spf-checker": "^1.0.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

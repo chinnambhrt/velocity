@@ -26,6 +26,11 @@ class State {
          */
         this.domainClaimed = '';
 
+        /**
+         * Domain SPF check result
+         */
+        this.spfResult = 'fail';
+
         // tls information of the client
         this.tls = {
 

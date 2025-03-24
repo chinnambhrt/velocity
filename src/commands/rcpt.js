@@ -39,6 +39,8 @@ module.exports = (client, request, callback) => {
         return callback();
     }
 
+    // everything is fine, add the recipient
+    // send the success response
     state.mail.recipients.push(parsed.email);
 
     client.useResponse(responses.RCPT.RCPT_OK);

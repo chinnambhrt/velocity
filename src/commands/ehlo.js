@@ -1,6 +1,7 @@
 
 const Client = require('../lib/client');
 const responses = require('../lib/responses');
+const { validateSpf } = require('../utils/spf-checker');
 
 /**
  * 
@@ -50,6 +51,12 @@ module.exports = (client, request, callback) => {
     capabilities.push('250-VRFY')
 
     capabilities.push('250 DSN');
+
+    validateSpf(client._socket.remoteAddress, state.domainClaimed).then((result) => {
+        state.spfResult = result;
+        console.log('SPF Result:', result);
+    });
+
 
     client.sendResponse(0, capabilities.join('\r\n'));
 
