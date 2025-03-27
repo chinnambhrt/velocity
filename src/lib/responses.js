@@ -6,6 +6,12 @@ module.exports = {
         message: 'Command not recognized'
     },
 
+    SERVICE_NOT_AVAILABLE: {
+        code: 421,
+        enhancedCode: '4.3.2',
+        message: 'Service not available, closing transmission channel'
+    },
+
 
     //#region Hello related responses
 

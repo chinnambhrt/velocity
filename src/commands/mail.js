@@ -18,6 +18,13 @@ module.exports = (client, request, callback) => {
         return callback();
     }
 
+    if (['fail', 'softfail', 'none'].includes(state.spfResult)) {
+        client._logger.warn('SPF validation failed; disconnecting')
+        client.useResponse(responses.SERVICE_NOT_AVAILABLE);
+        client.disconnect();
+        return callback();
+    }
+
     const parsed = commandUtils.fetchAddress(request);
 
     if (!parsed || !parsed.email) {
